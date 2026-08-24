@@ -1,0 +1,16 @@
+accelerate==1.12.0
+addict
+einops
+matplotlib
+numpy<2
+nuscenes-devkit
+omegaconf
+opencv-python
+pyquaternion
+safetensors
+scipy
+torch>=2
+torchvision
+tqdm
+utils3d @ git+https://github.com/EasternJournalist/utils3d.git@878c0ec
+xformers

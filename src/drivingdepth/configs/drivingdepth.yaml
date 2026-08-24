@@ -1,0 +1,58 @@
+# Model config with confidence prediction + cross_attn_blocks_v2 (neighbour view + cross frame).
+# anyview inherits da3-giant_sp_v2 (cross_attn_version: v2).
+__object__:
+  path: drivingdepth.model.da3
+  name: NestedDepthAnything3Net
+  args: as_params
+
+anyview:
+  __inherit__: drivingdepth.configs.da3-giant_sp_v2
+
+  __object__:
+    path: drivingdepth.model.da3
+    name: DepthAnything3Net
+    args: as_params
+
+  head:
+    __object__:
+      path: drivingdepth.model.dualdpt
+      name: DualDPT
+      args: as_params
+
+    dim_in: &head_dim_in 3072
+    output_dim: 2
+    features: &head_features 256
+    out_channels: &head_out_channels [256, 512, 1024, 1024]
+
+  pix_scale_head:
+    __object__:
+      path: drivingdepth.model.dpt
+      name: DPT
+      args: as_params
+
+    dim_in: 3072
+    output_dim: 1
+    features: 256
+    out_channels: [256, 512, 1024, 1024]
+    with_prompt_da: True
+    norm_type: "layer"
+    predict_conf: True  # enable confidence prediction
+
+metric:
+  __inherit__: drivingdepth.configs.da3metric-large
+
+  __object__:
+    path: drivingdepth.model.da3
+    name: DepthAnything3Net
+    args: as_params
+
+  head:
+    __object__:
+      path: drivingdepth.model.dpt
+      name: DPT
+      args: as_params
+
+    dim_in: 1024
+    output_dim: 1
+    features: 256
+    out_channels: [256, 512, 1024, 1024]

@@ -1,0 +1,37 @@
+# DA3 nuScenes inference / evaluation config
+# 4 frames / stride 1 / interval 1 / 6 surround cameras, v1.0-test split
+#
+# Run:
+#   accelerate launch --num_processes=8 \
+#     src/drivingdepth/inference/__main__.py \
+#     --config src/drivingdepth/configs/inference_nusc_4f1s1i.yaml
+
+inference:
+  # weights: a finetuned .pth (inference-only, see checkpoints/) or a raw .safetensors
+  load_from: checkpoints/nuscenes.pth
+  batch_size: 2          # per-GPU batch size
+  num_workers: 16
+  mixed_precision: bf16  # fp16 / bf16 / no
+  # output dir (depth / depth_vis / sky_mask / pix_scale / confidence /
+  # sparse_gt / batch_jsons / summary.json); required, the metrics are computed
+  # by merging batch_jsons/ once the run is done
+  save_dir: ./inference_output-4f1s1i
+  zero_prompt_da: false  # true: zero out the sparse depth prompt (ablation)
+
+model:
+  config_path: src/drivingdepth/configs/drivingdepth.yaml
+
+data:
+  datasets:
+    nuscenes:
+      dataset_class: drivingdepth.datasets.nuscenes_dataset.NuScenesMultiViewDataset
+      val:
+        data_root: /data/nuscenes/
+        target_size: [504, 280]
+        num_frames: 4
+        stride: 1
+        interval: 1
+        min_depth: 0.1
+        max_depth: 80
+        cameras: ['CAM_FRONT_LEFT', 'CAM_FRONT', 'CAM_FRONT_RIGHT', 'CAM_BACK_RIGHT', 'CAM_BACK', 'CAM_BACK_LEFT']
+        nusc: v1.0-test

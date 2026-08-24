@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Jupyter / OS
+.ipynb_checkpoints
+.DS_Store
+.vscode
+
+nuscenes
+/data
+DA3NESTED-GIANT-LARGE-1.1
+checkpoints
+checkpoints_*
+*.tgz
+*.pth
+*.safetensors
+
+logs
+inference_output*
+nohup.out
+core.*
+temp*
+*.mp4
+*.ply

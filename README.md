@@ -16,6 +16,7 @@ DrivingDepth is a sparse-prompted metric depth framework for autonomous driving.
 
 ## 📰 News
 
+- **2026-08-24:** 🚀 The nuScenes inference code is released! See [Getting Started](#-getting-started) for setup, weights, and evaluation.        
 - **2026-06-30:** 🎬 Paper is released: [DrivingDepth arXiv](https://arxiv.org/pdf/2606.31488). Code will be released very soon.
 - **2026-05-14:** 🎳 Demo is released: [DrivingDepth-page](https://hcaelrs.github.io/DrivingDepth-page/). Paper under writing, code to be organized soon.
 
@@ -44,6 +45,46 @@ DrivingDepth starts from a frozen Depth Anything 3 (DA3) prior and performs mini
 2. **Geometry-Preserving Feature Adapter:** sparse-depth tokens are fused with image tokens and propagated along constrained frame-view connections.
 3. **Sparse-Aware Pixel-Scale Head:** multi-scale features and LiDAR prompts predict a pixel-wise correction map and confidence map.
 4. **Metric output:** the corrected depth is produced by multiplying the frozen prior with the learned scale map and a clip-level global scale factor.
+
+## 🚀 Getting Started
+
+### 1. Environment
+
+```bash
+conda create -n dd python=3.12 -y
+conda activate dd
+pip install -r requirements.txt
+```
+
+The environment is largely compatible with [Depth Anything 3](https://github.com/ByteDance-Seed/Depth-Anything-3), so if you already have a working DA3 environment you can reuse it directly and only install the few extra packages listed in `requirements.txt`.
+
+### 2. Data
+
+Put the nuScenes dataset at `/data/nuscenes`, using standard devkit layout.
+
+The evaluation config uses the `v1.0-test` split with all 6 surround cameras. If your dataset lives elsewhere, change `data.datasets.nuscenes.val.data_root` in `src/drivingdepth/configs/inference_nusc_4f1s1i.yaml`.
+
+### 3. Weights
+
+Download the finetuned checkpoint from [🤗 HCaelrs/DrivingDepth](https://huggingface.co/HCaelrs/DrivingDepth) into `checkpoints/`:
+
+```bash
+hf download HCaelrs/DrivingDepth nuscenes.pth --local-dir checkpoints
+```
+
+This gives `checkpoints/nuscenes.pth`, which is the path expected by `inference.load_from`.
+
+### 4. Inference
+
+```bash
+bash scripts/run_inference_nusc.sh
+# or with a different GPU count / config
+NUM_PROCESSES=4 bash scripts/run_inference_nusc.sh src/drivingdepth/configs/inference_nusc_4f1s1i.yaml
+```
+
+The script launches distributed inference (8 processes by default) and then prints the aggregated per-view metrics from `summary.json`.
+
+Results are written to `inference_output-4f1s1i/nuscenes/` (`depth/`, `depth_vis/`, `sky_mask/`, `pix_scale/`, `confidence/`, `sparse_gt/`, `batch_jsons/`, `summary.json`). **Expect roughly 16 GB of output**, so make sure the target disk has enough free space; set `inference.save_dir` in the config to redirect it.
 
 ## 🖼️ Qualitative Results
 
